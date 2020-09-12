@@ -4,18 +4,18 @@
 
 ##### --BMap OverView
 ###### * Normal BMap 
-![ Normal Map](https://github.com/Liousvious/BMap/images/overview_n.png  "normal")
+![ Normal Map](https://github.com/Liousvious/BMap/raw/master/images/overview_n.png  "normal")
 ###### * Satelite BMap
-![ ](/home/liousvious/Git/images/overview_s.png  "Satelite BMap")
+![ ](https://github.com/Liousvious/BMap/raw/master/images/overview_s.png  "Satelite BMap")
 ##### --Simple TCP/IP connection
 ##### --Manual PathPlanning
-![ ](/home/liousvious/Git/images/pathplanning.png  "Manual Pathplanning")
+![ ](https://github.com/Liousvious/BMap/raw/master/images/pathplanning.png  "Manual Pathplanning")
 ##### --Mouse Tracking
 showing the GPS latitude and longitude in the mouse.
 ##### --PathPlanning Display Videos
 
 <video id="video" controls="" preload="none">
-    <source id="mp4" src="/home/liousvious/Git/images/motion_plan.mp4" type="video/mp4">
+    <source id="mp4" src="https://github.com/Liousvious/BMap/raw/master/images/motion_plan.mp4" type="video/mp4">
 </video>
 #### 2.Requirements
 ##### --Operating System : Ubuntu16.04LTS
