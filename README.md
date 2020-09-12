@@ -4,7 +4,7 @@
 
 ##### --BMap OverView
 ###### * Normal BMap 
-![ Normal Map](/home/liousvious/Git/images/overview_n.png  "normal")
+![ Normal Map](https://github.com/Liousvious/BMap/images/overview_n.png  "normal")
 ###### * Satelite BMap
 ![ ](/home/liousvious/Git/images/overview_s.png  "Satelite BMap")
 ##### --Simple TCP/IP connection
