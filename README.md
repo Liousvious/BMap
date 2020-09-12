@@ -26,3 +26,4 @@ to be continued!!!
 ##### ---Https : 
 ##### $git clone https://github.com/Liousvious/BMap.git
 then you can open the project in your Qt, you can redistribute the source file freely.
+##### or you can also execute the executivable file via release version v1.0.1.
