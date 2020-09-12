@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
+        #allmap{height:905px;width:100%;}
+        #r-result{width:100%; font-size:14px;}
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=pQobgLSIsBiCsxACVjDZ1ynEKiVm6pic"></script>
+    <!--script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script-->
+    <!--link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" /-->
+    <title>GPS实时定位</title>
+    <script src="./qwebchannel.js"></script>
+</head>
+<body>
+    <div id="allmap"></div>
+    <!--div id="r-result">
+        Longitude: <input id="longitude" type="text" style="width:100px; margin-right:10px;" />
+        Latitude: <input id="latitude" type="text" style="width:100px; margin-right:10px;" />
+        <input type="button" value="查询" onclick="theLocation()" />
+    </div-->
+</body>
+<!--input type="button" value="C++ function callback" onclick="onShowMsgBox()"-->
+</html>
+<script type="text/javascript">
+    // 百度地图API功能
+    var bm = new BMap.Map("allmap", {enableMapClick:false});
+    bm.setDefaultCursor("crosshair");
+    bm.disableDoubleClickZoom();
+
+    var scaleControl = new BMap.ScaleControl({anchor:BMAP_ANCHOR_TOP_LEFT});
+    bm.addControl(new BMap.MapTypeControl({
+        mapTypes:[
+            BMAP_NORMAL_MAP,
+            BMAP_HYBRID_MAP
+    ]}));
+    bm.addControl(scaleControl);
+    bm.addControl(new BMap.NavigationControl());
+    var copyrightControl = new BMap.CopyrightControl({
+        anchor:BMAP_ANCHOR_BOTTOM_RIGHT,
+        offset:new BMap.Size(10, 10)
+    });
+
+    bm.addControl(copyrightControl);
+    copyrightControl.addCopyright({id: 1,content: "<a style='font-size:20px;background:white'>Autonomous Vehicle Lab@NEU</a>"});
+
+
+    bm.centerAndZoom(new BMap.Point(123.422653,41.771836),19);
+    bm.disableScrollWheelZoom();
+    bm.enableContinuousZoom();
+    bm.disableDragging();
+    bm.disableInertialDragging();
+
+    //first application to display the marker in the map, via input the longitude and latitude
+    // 用经纬度设置地图中心点 get the longitude and latitude from Qt
+
+    var marker = new BMap.Marker();
+    var icon = marker.getIcon();
+    marker.setShadow(icon);
+
+    function theLocation_obstacle(longitude, latitude, json_str){
+        if(longitude != "" && latitude != "" || json_str != []){
+            // showinfo();
+            bm.clearOverlays();
+            bm.removeOverlay(marker);
+
+            var new_point = new BMap.Point(longitude, latitude);
+            marker.setPosition(new_point);  // 创建标注
+            bm.addOverlay(marker);                     // 将标注添加到地图中
+            //bm.panTo(new_point);
+
+            /*for (var i = 0; i < json_str.length; i++){
+                var pointob = new BMap.Point(json_str[i].lng,json_str[i].lat);
+
+                var markerob = new BMap.Marker();
+
+                var myIconob = new BMap.Icon("stop_icon.png", new BMap.Size(13, 13), {imageOffset: new BMap.Size(0, 0)});
+                myIconob.setImageSize(new BMap.Size(5, 5));
+
+                markerob.setIcon(myIconob);
+                markerob.setPosition(pointob);
+                markerob.setShadow(myIconob);
+                bm.addOverlay(markerob);
+            }*/
+        }
+    }
+
+
+    /*function theLocation(longitude, latitude){
+        if (longitude !="" && latitude !=""){
+
+            bm.clearOverlays();
+            var ggPoint = new BMap.Point(longitude,latitude);
+            translateCallback = function (data){
+                if(data.status === 0) {
+                    var marker = new BMap.Marker(data.points[0]);
+                    bm.addOverlay(marker);
+                    //marker.disableMassClear();
+                    bm.setCenter(data.points[0]);
+                }
+            }
+            setTimeout(function(){
+                var convertor = new BMap.Convertor();
+                var pointArr = [];
+                pointArr.push(ggPoint);
+                convertor.translate(pointArr, 1, 5, translateCallback) //from gcj-02 to bd-09(3, 5)
+            }, 1000);                                                  //from wgs-84 to bd-09(1, 5)
+        }
+    }*/
+
+    new QWebChannel(qt.webChannelTransport,function(channel){
+        window.showcoord = channel.objects.showcoord;    //To make the object known globally, assign it to the window object
+        window.returnpoints = channel.objects.returnpoints;
+    });
+
+
+    function updateInfo(lng, lat){
+        showcoord.getcoordinates(lng, lat);
+    }
+
+    bm.addEventListener("mousemove", function(e){
+        updateInfo(e.point.lng, e.point.lat);
+    });
+
+    /**************draw polylines*************/
+
+    var i = 0;
+    var j = 0;
+    var lon;
+    var lat;
+    var markerl;
+    var markerArry = [];
+    var pointArry = [];
+    var pointgdArry  = [];
+    var line = new BMap.Polyline();
+    var linegd = new BMap.Polyline();
+
+    line.setStrokeColor("purple");
+    line.setStrokeWeight(2);
+    line.setStrokeOpacity(0.5);
+
+    function clearlastpath(){
+        if (i == pointArry.length){
+            pointArry.splice(pointArry.length-1, 1);
+            i = i - 1;
+            //alert(JSON.stringify(pointArry));
+            //bm.removeOverlay(line);
+            line.setPath(pointArry);
+            bm.addOverlay(line);
+            bm.removeOverlay(markerArry[i]);
+        }
+    }
+
+    function clearallpath(){
+        i = 0;
+        pointArry.splice(0, pointArry.length);
+        for (var j = 0;j < markerArry.length; j++){
+            bm.removeOverlay(markerArry[j]);
+        }
+        markerArry.splice(0, markerArry.length);
+        line.enableMassClear();
+        bm.removeOverlay(line);
+        //bm.clearOverlays();
+    }
+
+    function drawLine(){
+        line.setPath(pointArry);
+        bm.addOverlay(line);
+        line.disableMassClear();
+    }
+
+    function getAddr(e){
+        lon = e.point.lng;
+        lat = e.point.lat;
+        //alert(lon,lat);
+        var pointl = new BMap.Point(lon, lat);
+
+        var myIcon = new BMap.Icon("circle.png", new BMap.Size(13, 13), {imageOffset: new BMap.Size(0, 0)});
+        myIcon.setImageSize(new BMap.Size(10, 10));          //you can choose to add some waypoints to your path
+        markerl = new BMap.Marker(pointl, {icon:myIcon});
+        bm.addOverlay(markerl);
+        markerl.disableMassClear();
+        markerArry[i] = markerl;
+        pointArry[i] = pointl;
+        i++;
+        drawLine();
+    }
+
+    function drawguideline(e){
+        var lng = e.point.lng;
+        var lat = e.point.lat;
+        var pointgd = new BMap.Point(lng, lat);
+        linegd.setPositionAt(i+1, pointgd);
+        bm.addOverlay(linegd);
+    }
+
+    /**********response to onPathPlanning**********/
+    function pathplanning(){
+        pointArry = [];
+        i = 0;
+        bm.removeOverlay(markerl);
+        bm.addEventListener("click", getAddr);
+        bm.addEventListener("mousemove", drawguideline);
+        bm.addEventListener("rightclick", clearlastpath);
+        bm.addEventListener("rightdblclick", clearallpath);
+    }
+
+    /*********exit pathplanning and return the path waypoints**********/
+    function exitPathPlanning(){
+        bm.removeEventListener("click", getAddr);
+        bm.removeEventListener("rightclick", clearlastpath);
+        bm.removeEventListener("rightdblclick", clearallpath);
+
+        if (pointArry.length !== 0){
+            //alert(JSON.stringify(pointArry));
+            returnpoints.returnWayPoints(JSON.stringify(pointArry));
+        }
+        bm.clearOverlays();
+    }
+
+</script>

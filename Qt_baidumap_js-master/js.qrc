@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Bmap.html</file>
+        <file>qwebchannel.js</file>
+        <file>circle.png</file>
+        <file>stop_icon.png</file>
+    </qresource>
+</RCC>
